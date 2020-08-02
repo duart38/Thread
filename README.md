@@ -1,3 +1,10 @@
+# Thread
+> Please note that this module is very much early in development. Things might... break...
+
+1. This module allows you to write **Web Worker** code inline with the rest of your code
+2. This module is also somewhat type safe
+3. Allows you to Thread already existing functions
+
 ## example
 ```typescript
 let thread = new Thread<number>((e: MessageEvent)=>{
@@ -15,4 +22,15 @@ thread.onMessage((e)=>{
     console.log(`back from thread: ${e}`)
 })
 thread.postMessage([10, 12])
+```
+Instead of using the workers postMessage() method we return value from withing our method
+
+**Here's a few more examples**
+```typescript
+function someFunction(e: MessageEvent){
+  return 0;
+}
+
+new Thread((e: MessageEvent)=>{return 0}); // inline Thread with return type of number
+new Thread(someFunction); // thread an already existing function
 ```
