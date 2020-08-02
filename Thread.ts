@@ -13,11 +13,7 @@ export default class Thread<T> {
     return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js" });
   }
 
-  public onMessage(callback: (e: T) => void) {
-    this.worker.onmessage = (e)=>callback(e.data);
-  }
   private populateFile(code: Function) {
-    console.log(`Writing to file ${this.fileName}`);
     Deno.writeTextFileSync(
       this.fileName,
       `
@@ -30,11 +26,31 @@ onmessage = function(e) {
 `
     );
   }
+
   private init() {
     addEventListener("unload", () => Deno.removeSync(this.fileName));
   }
 
+  /**
+   * Sends data to the Thread
+   * @param msg 
+   */
   public postMessage(msg: any) {
     this.worker.postMessage(msg);
+  }
+
+  /**
+   * Handbrakes are very handy you know
+   */
+  public stop() {
+      this.worker.terminate();
+  }
+
+  /**
+   * Bind to the worker to receive messages
+   * @param callback Function that is called when the worker sends data back
+   */
+  public onMessage(callback: (e: T) => void) {
+    this.worker.onmessage = (e)=>callback(e.data);
   }
 }
