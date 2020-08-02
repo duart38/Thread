@@ -28,7 +28,7 @@ onmessage = function(e) {
 }
 
 `
-    ); // ${Deno.readTextFileSync("Observe.js")}
+    );
   }
   private init() {
     addEventListener("unload", () => Deno.removeSync(this.fileName));
