@@ -23,7 +23,7 @@ onmessage = function(e) {
     postMessage(userCode(e));
 }
 
-`
+`,
     );
   }
 
@@ -43,7 +43,7 @@ onmessage = function(e) {
    * Handbrakes are very handy you know
    */
   public stop() {
-      this.worker.terminate();
+    this.worker.terminate();
   }
 
   /**
@@ -51,6 +51,6 @@ onmessage = function(e) {
    * @param callback Function that is called when the worker sends data back
    */
   public onMessage(callback: (e: T) => void) {
-    this.worker.onmessage = (e)=>callback(e.data);
+    this.worker.onmessage = (e) => callback(e.data);
   }
 }
