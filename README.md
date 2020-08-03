@@ -1,5 +1,5 @@
 ![alt text](https://raw.githubusercontent.com/duart38/Thread/master/logo.svg "Logo Title Text 1")
-# Thread
+
 > Please note that this module is very much early in development. Things might... break...
 
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/Thread)
