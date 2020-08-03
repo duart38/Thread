@@ -1,0 +1,11 @@
+{
+  "name": "Thread",
+  "description": "Type-safe multi-threading made 'easier'",
+  "stable": true,
+  "files": [
+    "./LICENSE",
+    "./README.md",
+    "./Thread.ts",
+    "./Thread.bundle.js"
+  ]
+}
