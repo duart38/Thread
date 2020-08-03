@@ -1,0 +1,60 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57.78 58.85">
+  <defs>
+    <style>
+      .cls-1, .cls-4 {
+        fill: #fbb03b;
+      }
+
+      .cls-2, .cls-3 {
+        stroke: #000;
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        stroke-width: 4px;
+      }
+
+      .cls-4, .cls-5 {
+        stroke: #fbb03b;
+      }
+
+      .cls-4 {
+        stroke-width: 2px;
+      }
+
+      .cls-5 {
+        fill: none;
+      }
+
+      .cls-6 {
+        font-size: 12px;
+        font-family: AkagiPro-Fat, Akagi Pro;
+        font-weight: 900;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="6.97" y="11.14" width="44.91" height="18.05"/>
+  <rect class="cls-2" x="3.87" y="8.95" width="51.12" height="1.91"/>
+  <rect class="cls-2" x="3.87" y="13.23" width="51.12" height="1.91"/>
+  <rect class="cls-2" x="3.87" y="17.6" width="51.12" height="1.91"/>
+  <rect class="cls-2" x="3.87" y="22.1" width="51.12" height="1.91"/>
+  <rect class="cls-2" x="3.87" y="26.85" width="51.12" height="1.91"/>
+  <rect class="cls-3" x="12.32" y="2" width="34.22" height="34.22" rx="6.95"/>
+  <rect class="cls-4" x="17.28" y="9.95" width="10.15" height="7.22"/>
+  <rect x="16.3" y="8.95" width="1.97" height="20.76"/>
+  <rect x="122.85" y="51.02" width="1.97" height="12.57" transform="translate(-34.7 153.03) rotate(-90)"/>
+  <rect x="28.89" y="19.94" width="1.97" height="10.23"/>
+  <rect x="132.66" y="45.51" width="1.97" height="7.05" transform="translate(-16.62 154.58) rotate(-90)"/>
+  <rect x="135.18" y="48.89" width="1.97" height="9.31" transform="translate(-18.61 161.6) rotate(-90)"/>
+  <rect x="132.66" y="53.78" width="1.97" height="7.05" transform="translate(-24.88 162.84) rotate(-90)"/>
+  <rect x="35.93" y="17.65" width="1.97" height="4.26"/>
+  <circle class="cls-5" cx="36.91" cy="16.37" r="1.22"/>
+  <circle class="cls-5" cx="40.81" cy="25.43" r="1.22"/>
+  <circle class="cls-5" cx="36.91" cy="29.19" r="1.22"/>
+  <text class="cls-6" transform="translate(6.38 50.55)">THREAD</text>
+  <path class="cls-1" d="M131.29,81.38c2-1.81,4.58-.73,6.78,0a5.21,5.21,0,0,0,2.41.28c1.17-.17,2.23-.76,3.43-.82,1.94-.09,3.74.62,5.68.08a7.12,7.12,0,0,0,3.93-2.8c.28-.4-.37-.77-.65-.38a6.36,6.36,0,0,1-5.39,2.69c-1.06,0-2.11-.32-3.18-.34a9.24,9.24,0,0,0-2.74.53,5.29,5.29,0,0,1-3.47,0,17.72,17.72,0,0,0-3-.89,5.19,5.19,0,0,0-4.37,1.15c-.36.32.17.85.53.53Z" transform="translate(-101.23 -28.11)"/>
+</svg>
