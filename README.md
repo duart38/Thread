@@ -1,6 +1,8 @@
 # Thread
 > Please note that this module is very much early in development. Things might... break...
 
+[![nest badge](https://nest.land/badge.svg)](https://nest.land/package/Thread)
+
 1. This module allows you to write **Web Worker** code inline with the rest of your code
 2. This module is also somewhat type safe
 3. Allows you to Thread already existing functions
