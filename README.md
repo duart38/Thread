@@ -1,3 +1,4 @@
+![alt text](https://raw.githubusercontent.com/duart38/Thread/master/logo.svg "Logo Title Text 1")
 # Thread
 > Please note that this module is very much early in development. Things might... break...
 
