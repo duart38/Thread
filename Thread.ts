@@ -1,7 +1,9 @@
 export default class Thread<T> {
   public fileName: string;
   public worker: Worker;
-  constructor(operation: (e: MessageEvent) => T) {
+  private imports: Array<string>;
+  constructor(operation: (e: MessageEvent) => T, imports?: Array<string>) {
+    this.imports = imports || [];
     this.fileName = this.createFile();
     this.populateFile(operation);
     this.worker = new Worker(new URL(this.fileName, import.meta.url).href, {
@@ -10,13 +12,17 @@ export default class Thread<T> {
     this.init();
   }
   private createFile(): string {
-    return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js" });
+    Deno.mkdirSync("./tmp_threads", { recursive: true });
+    return Deno.makeTempFileSync(
+      { prefix: "deno_thread_", suffix: ".js", dir: "./tmp_threads" },
+    );
   }
 
   private populateFile(code: Function) {
     Deno.writeTextFileSync(
       this.fileName,
       `
+${this.imports.join("\n")}
 var userCode = ${code.toString()}
 
 onmessage = function(e) {

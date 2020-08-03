@@ -33,4 +33,5 @@ function someFunction(e: MessageEvent){
 
 new Thread((e: MessageEvent)=>{return 0}); // inline Thread with return type of number
 new Thread(someFunction); // thread an already existing function
+new Thread(someFunction, ['import Something from "../some.bundle.js";']); // thread with custom importing (threads will be added to a folder in your project directory.)
 ```
