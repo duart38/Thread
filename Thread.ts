@@ -3,6 +3,9 @@ export default class Thread<T> {
   public worker: Worker;
   private imports: Array<string>;
   constructor(operation: (e: MessageEvent) => T, imports?: Array<string>) {
+    imports?.forEach((v)=> {
+      if(v.endsWith(".ts'") || v.endsWith('.ts"')) throw new Error("Threaded imports do no support typescript files");
+    })
     this.imports = imports || [];
     this.fileName = this.createFile();
     this.populateFile(operation);
