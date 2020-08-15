@@ -107,17 +107,23 @@ System.register("Thread", [], function (exports_1, context_1) {
         execute: function () {
             Thread = class Thread {
                 constructor(operation, imports) {
+                    this.folderName = "./tmp_threads";
+                    imports?.forEach((v) => {
+                        if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
+                            throw new Error("Threaded imports do no support typescript files");
+                        }
+                    });
                     this.imports = imports || [];
                     this.fileName = this.createFile();
                     this.populateFile(operation);
                     this.worker = new Worker(new URL(this.fileName, context_1.meta.url).href, {
                         type: "module",
                     });
-                    this.init();
+                    this.cleanUp();
                 }
                 createFile() {
-                    Deno.mkdirSync("./tmp_threads", { recursive: true });
-                    return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js", dir: "./tmp_threads" });
+                    Deno.mkdirSync(this.folderName, { recursive: true });
+                    return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js", dir: this.folderName });
                 }
                 populateFile(code) {
                     Deno.writeTextFileSync(this.fileName, `
@@ -130,8 +136,13 @@ onmessage = function(e) {
 
 `);
                 }
-                init() {
-                    addEventListener("unload", () => Deno.removeSync(this.fileName));
+                async cleanUp() {
+                    await Deno.remove(this.fileName);
+                    try {
+                        await Deno.remove(this.folderName);
+                    }
+                    catch (error) {
+                    }
                 }
                 postMessage(msg) {
                     this.worker.postMessage(msg);
