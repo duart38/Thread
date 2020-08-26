@@ -106,8 +106,8 @@ System.register("Thread", [], function (exports_1, context_1) {
         setters: [],
         execute: function () {
             Thread = class Thread {
-                constructor(operation, imports) {
-                    this.folderName = "./tmp_threads";
+                constructor(operation, imports, deno) {
+                    this.importsMod = [];
                     imports?.forEach((v) => {
                         if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
                             throw new Error("Threaded imports do no support typescript files");
@@ -118,16 +118,16 @@ System.register("Thread", [], function (exports_1, context_1) {
                     this.populateFile(operation);
                     this.worker = new Worker(new URL(this.fileName, context_1.meta.url).href, {
                         type: "module",
+                        deno,
                     });
-                    this.cleanUp();
                 }
                 createFile() {
-                    Deno.mkdirSync(this.folderName, { recursive: true });
-                    return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js", dir: this.folderName });
+                    return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js" });
                 }
                 populateFile(code) {
+                    this.imports?.forEach((val) => this.copyDep(val));
                     Deno.writeTextFileSync(this.fileName, `
-${this.imports.join("\n")}
+${this.importsMod.join("\n")}
 var userCode = ${code.toString()}
 
 onmessage = function(e) {
@@ -136,13 +136,29 @@ onmessage = function(e) {
 
 `);
                 }
-                async cleanUp() {
-                    await Deno.remove(this.fileName);
-                    try {
-                        await Deno.remove(this.folderName);
+                copyDep(str) {
+                    var importPathRegex = /('|"|`)(.+\.js)(\1)/ig;
+                    var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig;
+                    var importFileName = /(\/\w+.js)/ig;
+                    var matchedPath = importPathRegex.exec(str) || "";
+                    var file = false;
+                    if (!matchedPath[0].includes("http://") &&
+                        !matchedPath[0].includes("https://")) {
+                        file = true;
+                        var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+                        Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
                     }
-                    catch (error) {
+                    var matchedIns = importInsRegex.exec(str) || "";
+                    if (file) {
+                        this.importsMod.push(`${matchedIns[0]} ".${str.match(importFileName)}"`);
                     }
+                    else {
+                        this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
+                    }
+                }
+                getTempFolder() {
+                    let t = this.fileName;
+                    return t.replace(/(\/\w+.js)/ig, "/");
                 }
                 postMessage(msg) {
                     this.worker.postMessage(msg);
