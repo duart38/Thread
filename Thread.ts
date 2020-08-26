@@ -21,7 +21,9 @@ export default class Thread<T> {
     this.imports = imports || [];
     this.fileName = this.createFile();
     this.populateFile(operation);
-    this.worker = new Worker(new URL(this.fileName, import.meta.url).href, {
+    let workerURL = new URL(this.fileName, import.meta.url);
+
+    this.worker = new Worker(workerURL.href.startsWith("http") ? "file:"+workerURL.pathname : workerURL.href, {
       type: "module",
       deno,
     });
