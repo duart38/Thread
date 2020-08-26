@@ -2,13 +2,17 @@ export default class Thread<T> {
   public fileName: string;
   public worker: Worker;
   private imports: Array<string>;
-  private folderName: string = "./tmp_threads";
+  private importsMod: Array<string> = [];
   /**
    * 
    * @param operation The method to be used in the thread
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
-  constructor(operation: (e: MessageEvent) => T, imports?: Array<string>) {
+  constructor(
+    operation: (e: MessageEvent) => T,
+    imports?: Array<string>,
+    deno?: boolean,
+  ) {
     imports?.forEach((v) => {
       if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
         throw new Error("Threaded imports do no support typescript files");
@@ -19,21 +23,21 @@ export default class Thread<T> {
     this.populateFile(operation);
     this.worker = new Worker(new URL(this.fileName, import.meta.url).href, {
       type: "module",
+      deno,
     });
-    this.cleanUp();
   }
   private createFile(): string {
-    Deno.mkdirSync(this.folderName, { recursive: true });
     return Deno.makeTempFileSync(
-      { prefix: "deno_thread_", suffix: ".js", dir: this.folderName },
+      { prefix: "deno_thread_", suffix: ".js" },
     );
   }
 
   private populateFile(code: Function) {
+    this.imports?.forEach((val) => this.copyDep(val));
     Deno.writeTextFileSync(
       this.fileName,
       `
-${this.imports.join("\n")}
+${this.importsMod.join("\n")}
 var userCode = ${code.toString()}
 
 onmessage = function(e) {
@@ -45,14 +49,36 @@ onmessage = function(e) {
   }
 
   /**
-   * Attempt to cleanup files
+   * Handles a single import line
+   * @param str the import line (eg: import {som} from "lorem/ipsum.js";)
    */
-  private async cleanUp() {
-    await Deno.remove(this.fileName);
-    try { // attempt to clean the folder in case it is empty
-      await Deno.remove(this.folderName);
-    } catch (error) {
+  private copyDep(str: string) {
+    var importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
+    var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
+    var importFileName = /(\/\w+.js)/ig; // for the file name that was copied (/ipsum.js)  !note the slash before the fn
+    var matchedPath = importPathRegex.exec(str) || "";
+    var file = false;
+
+    if (
+      !matchedPath[0].includes("http://") &&
+      !matchedPath[0].includes("https://")
+    ) {
+      file = true;
+      var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+      Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
     }
+    var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
+
+    if (file) {
+      this.importsMod.push(`${matchedIns[0]} ".${str.match(importFileName)}"`);
+    } else {
+      this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
+    }
+  }
+
+  private getTempFolder() {
+    let t = this.fileName;
+    return t.replace(/(\/\w+.js)/ig, "/");
   }
 
   /**
