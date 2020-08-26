@@ -1,16 +1,14 @@
 import Thread from "../Thread.ts";
-import { CallMe } from '../test_import.js';
+import {CallMe} from "../test_import.js"
 
-function someFunction(e: MessageEvent) {
+let tr = new Thread((e)=>{
   CallMe();
-  return 1;
-}
-let thread = new Thread(someFunction, ["import { CallMe } from '../test_import.js'"]);
-thread.onMessage((e) => {
-  console.log(`recived back from thread: ${e}`);
-});
-thread.postMessage(999);
+  return "pong"
+}, ['import {CallMe} from "./test_import.js"'])
 
-setInterval(()=>{
-  thread.postMessage(999);
-}, 4000)
+tr.postMessage("ping");
+
+tr.onMessage((e)=>{
+  console.log(e);
+});
+
