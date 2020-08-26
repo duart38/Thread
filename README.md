@@ -7,6 +7,8 @@
 1. This module allows you to write **Web Worker** code inline with the rest of your code
 2. This module is also somewhat type safe
 3. Allows you to Thread already existing functions
+4. Supports Deno unstable features
+5. Allows module imports inside the worker
 
 ## example
 ```typescript
@@ -36,5 +38,5 @@ function someFunction(e: MessageEvent){
 
 new Thread((e: MessageEvent)=>{return 0}); // inline Thread with return type of number
 new Thread(someFunction); // thread an already existing function
-new Thread(someFunction, ['import Something from "../some.bundle.js";']); // thread with custom importing (threads will be added to a folder in your project directory.)
+new Thread(someFunction, ['import Something from "../some.bundle.js";']); // thread with custom importing
 ```
