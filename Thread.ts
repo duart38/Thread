@@ -113,7 +113,6 @@ onmessage = function(e) {
 
   /**
    * Handbrakes are very handy you know
-   * NOTE: calls remove()
    */
   public stop() {
     this.stopped = true;
