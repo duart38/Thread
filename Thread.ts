@@ -25,6 +25,7 @@ export default class Thread<T> {
     });
     this.imports = imports || [];
     this.fileName = this.createFile();
+    this.createImportsFolder()
     this.populateFile(operation);
     this.workerURL = new URL(this.fileName, import.meta.url);
 
@@ -33,10 +34,20 @@ export default class Thread<T> {
       deno,
     });
   }
+  /**
+   * Creates the file that will house our worker
+   */
   private createFile(): string {
     return Deno.makeTempFileSync(
       { prefix: "deno_thread_", suffix: ".js" },
     );
+  }
+  /**
+   * Creates folder in temp directory to house our imported files.
+   * This is purely to make cleanup easier
+   */
+  private createImportsFolder(){
+    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", {recursive: true})
   }
 
   private populateFile(code: Function) {
@@ -72,17 +83,21 @@ onmessage = function(e) {
     ) {
       file = true;
       var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
+      console.log(fqfn, this.getTempFolder());
+      Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (file) {
-      this.importsMod.push(`${matchedIns[0]} ".${str.match(importFileName)}"`);
+      this.importsMod.push(`${matchedIns[0]} "./threaded_imports${str.match(importFileName)}"`);
     } else {
       this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
     }
   }
 
+  /**
+   * Get the location of the temporary folder by checking the file name.
+   */
   private getTempFolder() {
     let t = this.fileName;
     return t.replace(/(\/\w+.js)/ig, "/");
