@@ -108,16 +108,18 @@ System.register("Thread", [], function (exports_1, context_1) {
             Thread = class Thread {
                 constructor(operation, imports, deno) {
                     this.importsMod = [];
+                    this.stopped = false;
                     imports?.forEach((v) => {
                         if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
                             throw new Error("Threaded imports do no support typescript files");
                         }
                     });
                     this.imports = imports || [];
-                    this.fileName = this.createFile();
+                    this.filePath = this.createFile();
+                    this.createImportsFolder();
                     this.populateFile(operation);
-                    let workerURL = new URL(this.fileName, context_1.meta.url);
-                    this.worker = new Worker(workerURL.href.startsWith("http") ? "file:" + workerURL.pathname : workerURL.href, {
+                    this.workerURL = new URL(this.filePath, context_1.meta.url);
+                    this.worker = new Worker(this.workerURL.href.startsWith("http") ? "file:" + this.workerURL.pathname : this.workerURL.href, {
                         type: "module",
                         deno,
                     });
@@ -125,9 +127,12 @@ System.register("Thread", [], function (exports_1, context_1) {
                 createFile() {
                     return Deno.makeTempFileSync({ prefix: "deno_thread_", suffix: ".js" });
                 }
+                createImportsFolder() {
+                    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", { recursive: true });
+                }
                 populateFile(code) {
                     this.imports?.forEach((val) => this.copyDep(val));
-                    Deno.writeTextFileSync(this.fileName, `
+                    Deno.writeTextFileSync(this.filePath, `
 ${this.importsMod.join("\n")}
 var userCode = ${code.toString()}
 
@@ -147,28 +152,42 @@ onmessage = function(e) {
                         !matchedPath[0].includes("https://")) {
                         file = true;
                         var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-                        Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
+                        Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
                     }
                     var matchedIns = importInsRegex.exec(str) || "";
                     if (file) {
-                        this.importsMod.push(`${matchedIns[0]} ".${str.match(importFileName)}"`);
+                        this.importsMod.push(`${matchedIns[0]} "./threaded_imports${str.match(importFileName)}"`);
                     }
                     else {
                         this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
                     }
                 }
                 getTempFolder() {
-                    let t = this.fileName;
+                    let t = this.filePath;
                     return t.replace(/(\/\w+.js)/ig, "/");
                 }
                 postMessage(msg) {
                     this.worker.postMessage(msg);
+                    return this;
                 }
                 stop() {
+                    this.stopped = true;
                     this.worker.terminate();
+                }
+                remove() {
+                    if (this.stopped == false)
+                        this.stop();
+                    try {
+                        Deno.removeSync(this.filePath, { recursive: true });
+                    }
+                    catch (err) {
+                        console.error(`Failed to remove worker file: ${this.filePath}`);
+                        console.error(err);
+                    }
                 }
                 onMessage(callback) {
                     this.worker.onmessage = (e) => callback(e.data);
+                    return this;
                 }
             };
             exports_1("default", Thread);
