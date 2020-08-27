@@ -71,15 +71,13 @@ onmessage = function(e) {
       !matchedPath[0].includes("https://")
     ) {
       file = true;
-      //var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      //Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
+      var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+      Deno.copyFileSync(fqfn, this.getTempFolder() + fqfn);
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (file) {
-      let fqp = new URL(`.${str.match(importFileName)}`, import.meta.url);
-      console.log(fqp)
-      this.importsMod.push(`${matchedIns[0]} "${fqp.pathname}"`); //".${str.match(importFileName)}"
+      this.importsMod.push(`${matchedIns[0]} ".${str.match(importFileName)}"`);
     } else {
       this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
     }
