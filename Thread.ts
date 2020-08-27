@@ -1,5 +1,5 @@
 export default class Thread<T> {
-  public fileName: string;
+  public filePath: string;
   private workerURL: URL;
   public worker: Worker;
   private imports: Array<string>;
@@ -24,10 +24,10 @@ export default class Thread<T> {
       }
     });
     this.imports = imports || [];
-    this.fileName = this.createFile();
+    this.filePath = this.createFile();
     this.createImportsFolder()
     this.populateFile(operation);
-    this.workerURL = new URL(this.fileName, import.meta.url);
+    this.workerURL = new URL(this.filePath, import.meta.url);
 
     this.worker = new Worker(this.workerURL.href.startsWith("http") ? "file:"+this.workerURL.pathname : this.workerURL.href, {
       type: "module",
@@ -53,7 +53,7 @@ export default class Thread<T> {
   private populateFile(code: Function) {
     this.imports?.forEach((val) => this.copyDep(val));
     Deno.writeTextFileSync(
-      this.fileName,
+      this.filePath,
       `
 ${this.importsMod.join("\n")}
 var userCode = ${code.toString()}
@@ -98,7 +98,7 @@ onmessage = function(e) {
    * Get the location of the temporary folder by checking the file name.
    */
   private getTempFolder() {
-    let t = this.fileName;
+    let t = this.filePath;
     return t.replace(/(\/\w+.js)/ig, "/");
   }
 
@@ -127,9 +127,9 @@ onmessage = function(e) {
   public remove(){
     if(this.stopped == false) this.stop();
     try{
-      Deno.removeSync(this.fileName, {recursive: true});
+      Deno.removeSync(this.filePath, {recursive: true});
     }catch(err){
-      console.error(`Failed to remove worker file: ${this.fileName}`)
+      console.error(`Failed to remove worker file: ${this.filePath}`)
       console.error(err);
     }
   }
