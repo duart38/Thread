@@ -92,8 +92,9 @@ onmessage = function(e) {
    * Sends data to the Thread
    * @param msg 
    */
-  public postMessage(msg: any) {
+  public postMessage(msg: any): this{
     this.worker.postMessage(msg);
+    return this;
   }
 
   /**
@@ -123,7 +124,8 @@ onmessage = function(e) {
    * Bind to the worker to receive messages
    * @param callback Function that is called when the worker sends data back
    */
-  public onMessage(callback: (e: T) => void) {
+  public onMessage(callback: (e: T) => void): this {
     this.worker.onmessage = (e) => callback(e.data);
+    return this;
   }
 }
