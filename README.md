@@ -1,6 +1,5 @@
 ![alt text](https://github.com/duart38/Thread/blob/master/th_logo.png?raw=true "Logo Title Text 1")
 
-> Please note that this module is very much early in development. Things might... break...
 
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/Thread)
 
