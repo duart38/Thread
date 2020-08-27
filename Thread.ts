@@ -1,8 +1,13 @@
 export default class Thread<T> {
   public fileName: string;
+  private workerURL: URL;
   public worker: Worker;
   private imports: Array<string>;
   private importsMod: Array<string> = [];
+  /**
+   * Tells if the worker has been stopped
+   */
+  public stopped = false;
   /**
    * 
    * @param operation The method to be used in the thread
@@ -21,9 +26,9 @@ export default class Thread<T> {
     this.imports = imports || [];
     this.fileName = this.createFile();
     this.populateFile(operation);
-    let workerURL = new URL(this.fileName, import.meta.url);
+    this.workerURL = new URL(this.fileName, import.meta.url);
 
-    this.worker = new Worker(workerURL.href.startsWith("http") ? "file:"+workerURL.pathname : workerURL.href, {
+    this.worker = new Worker(this.workerURL.href.startsWith("http") ? "file:"+this.workerURL.pathname : this.workerURL.href, {
       type: "module",
       deno,
     });
@@ -93,9 +98,25 @@ onmessage = function(e) {
 
   /**
    * Handbrakes are very handy you know
+   * NOTE: calls remove()
    */
   public stop() {
+    this.stopped = true;
     this.worker.terminate();
+  }
+
+  /**
+   * Removes the current worker file from the temporary folder
+   * NOTE: Can be used while the program is running (calls stop()..)
+   */
+  public remove(){
+    if(this.stopped == false) this.stop();
+    try{
+      Deno.removeSync(this.fileName, {recursive: true});
+    }catch(err){
+      console.error(`Failed to remove worker file: ${this.fileName}`)
+      console.error(err);
+    }
   }
 
   /**
