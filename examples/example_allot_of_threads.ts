@@ -1,6 +1,6 @@
 import Thread from "../Thread.ts"
 
-let count = 20;
+let count = 13;
 
 function postMessage(e: any){}
 
