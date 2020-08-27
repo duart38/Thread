@@ -83,7 +83,6 @@ onmessage = function(e) {
     ) {
       file = true;
       var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      console.log(fqfn, this.getTempFolder());
       Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
