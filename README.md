@@ -2,6 +2,10 @@
 
 
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/Thread)
+![alt text](https://img.shields.io/github/license/duart38/Thread?color=blue "License")
+![alt text](https://img.shields.io/github/v/release/duart38/Thread?color=red "Release")
+
+
 
 1. This module allows you to write **Web Worker** code inline with the rest of your code
 2. This module is also somewhat type safe
