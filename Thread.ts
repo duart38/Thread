@@ -126,7 +126,7 @@ onmessage = function(e) {
   public remove(){
     if(this.stopped == false) this.stop();
     try{
-      Deno.removeSync(this.filePath, {recursive: true});
+      return Deno.remove(this.filePath, {recursive: true});
     }catch(err){
       console.error(`Failed to remove worker file: ${this.filePath}`)
       console.error(err);
