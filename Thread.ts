@@ -84,13 +84,13 @@ onmessage = function(e) {
     ) {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      //Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
+      //Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn); // removed in favor of full path to module
       
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (file) {
-      this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`);
+      this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`); // returns the full path.
     } else {
       this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
     }
