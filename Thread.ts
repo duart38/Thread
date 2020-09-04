@@ -76,19 +76,21 @@ onmessage = function(e) {
     var importFileName = /(\/\w+.js)/ig; // for the file name that was copied (/ipsum.js)  !note the slash before the fn
     var matchedPath = importPathRegex.exec(str) || "";
     var file = false;
+    var fqfn = "";
 
     if (
       !matchedPath[0].includes("http://") &&
       !matchedPath[0].includes("https://")
     ) {
       file = true;
-      var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
+      fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+      //Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
+      
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (file) {
-      this.importsMod.push(`${matchedIns[0]} "./threaded_imports${str.match(importFileName)}"`);
+      this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`);
     } else {
       this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
     }
