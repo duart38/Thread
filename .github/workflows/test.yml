@@ -27,4 +27,4 @@ jobs:
     - name: Setup Deno environment
       uses: denolib/setup-deno@v2.2.0
     - name: Run the test
-      run: deno test
+      run: deno test -A
