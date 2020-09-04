@@ -145,18 +145,20 @@ onmessage = function(e) {
                 copyDep(str) {
                     var importPathRegex = /('|"|`)(.+\.js)(\1)/ig;
                     var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig;
-                    var importFileName = /(\/\w+.js)/ig;
                     var matchedPath = importPathRegex.exec(str) || "";
                     var file = false;
+                    var fqfn = "";
                     if (!matchedPath[0].includes("http://") &&
                         !matchedPath[0].includes("https://")) {
                         file = true;
-                        var fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-                        Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn);
+                        fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
                     }
                     var matchedIns = importInsRegex.exec(str) || "";
+                    if (!matchedIns)
+                        throw new Error("The import instruction seems to be unreadable try formatting it, for example: \n"
+                            + "import { something } from './somet.js' \n ");
                     if (file) {
-                        this.importsMod.push(`${matchedIns[0]} "./threaded_imports${str.match(importFileName)}"`);
+                        this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`);
                     }
                     else {
                         this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
@@ -178,7 +180,7 @@ onmessage = function(e) {
                     if (this.stopped == false)
                         this.stop();
                     try {
-                        Deno.removeSync(this.filePath, { recursive: true });
+                        return Deno.remove(this.filePath, { recursive: true });
                     }
                     catch (err) {
                         console.error(`Failed to remove worker file: ${this.filePath}`);
