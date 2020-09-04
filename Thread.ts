@@ -73,7 +73,6 @@ onmessage = function(e) {
   private copyDep(str: string) {
     var importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
     var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
-    var importFileName = /(\/\w+.js)/ig; // for the file name that was copied (/ipsum.js)  !note the slash before the fn
     var matchedPath = importPathRegex.exec(str) || "";
     var file = false;
     var fqfn = "";
@@ -84,10 +83,12 @@ onmessage = function(e) {
     ) {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      //Deno.copyFileSync(fqfn, this.getTempFolder() + "/threaded_imports/" + fqfn); // removed in favor of full path to module
       
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
+    
+    if(!matchedIns) throw new Error("The import instruction seems to be unreadable try formatting it, for example: \n"
+    +"import { something } from './somet.js' \n ")
 
     if (file) {
       this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`); // returns the full path.
