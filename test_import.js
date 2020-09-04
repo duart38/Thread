@@ -1,5 +1,5 @@
 import Observe from "https://raw.githubusercontent.com/duart38/Observe/master/Observe.bundle.js";
-import {add} from "./sandbox/impone.js";
+import {add} from "./nest/impone.js";
 
 export function CallMe(){
     console.log("I've been imported!!!!")
