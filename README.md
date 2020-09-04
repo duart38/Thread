@@ -4,6 +4,7 @@
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/Thread)
 ![alt text](https://img.shields.io/github/license/duart38/Thread?color=blue "License")
 ![alt text](https://img.shields.io/github/v/release/duart38/Thread?color=red "Release")
+![alt text](https://img.shields.io/github/workflow/status/duart38/Thread/Test%20module?label=Tests "Tests")
 
 
 
