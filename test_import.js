@@ -1,4 +1,3 @@
-import { cleanWorkerImports } from "./utils.js";
 import Observe from "https://raw.githubusercontent.com/duart38/Observe/master/Observe.bundle.js";
 import {add} from "./sandbox/impone.js";
 
