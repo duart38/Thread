@@ -15,8 +15,8 @@ export default class Thread<T> {
    */
   constructor(
     operation: (e: MessageEvent) => T,
+    type?: "classic" | "module",
     imports?: Array<string>,
-    deno?: boolean,
   ) {
     imports?.forEach((v) => {
       if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
@@ -30,8 +30,7 @@ export default class Thread<T> {
     this.workerURL = new URL(this.filePath, import.meta.url);
 
     this.worker = new Worker(this.workerURL.href.startsWith("http") ? "file:"+this.workerURL.pathname : this.workerURL.href, {
-      type: "module",
-      deno,
+      type
     });
   }
   /**
