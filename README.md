@@ -25,7 +25,7 @@ let thread = new Thread<number>((e: MessageEvent)=>{
       console.log('Worker: Posting message back to main script');
       return(result);
     }
-});
+}, "module");
 
 thread.onMessage((e)=>{
     console.log(`back from thread: ${e}`)
@@ -40,9 +40,9 @@ function someFunction(e: MessageEvent){
   return 0;
 }
 
-new Thread((e: MessageEvent)=>{return 0}); // inline Thread with return type of number
-new Thread(someFunction); // thread an already existing function
-new Thread(someFunction, ['import Something from "../some.bundle.js";']); // thread with custom importing
+new Thread((e: MessageEvent)=>{return 0}, "module"); // inline Thread with return type of number
+new Thread(someFunction, "module"); // thread an already existing function
+new Thread(someFunction, "module", ['import Something from "../some.bundle.js";']); // thread with custom importing
 ```
 
 ## API
