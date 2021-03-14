@@ -2,8 +2,8 @@ import {
     assertEquals,
     fail,
     assertThrows
-  } from "https://deno.land/std@0.66.0/testing/asserts.ts";
-  import Thread from "./Thread.ts";
+  } from "https://deno.land/std@0.90.0/testing/asserts.ts";
+import Thread from "./Thread.ts";
 import { returnNumber } from "./test_import.js";
 
 
@@ -53,7 +53,7 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("Worker cleans itself up", async() => {
     let t = new Thread((e)=>0, "module");
-    await t.remove()
+    await t.remove();
     assertThrows(()=>Deno.readFileSync(t.filePath))
   })
 
