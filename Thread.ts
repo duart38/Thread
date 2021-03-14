@@ -132,6 +132,7 @@ onmessage = function(e) {
     }catch(err){
       console.error(`Failed to remove worker file: ${this.filePath}`)
       console.error(err);
+      return Promise.reject(`Failed to remove worker file: ${this.filePath}`);
     }
   }
 
