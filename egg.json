@@ -4,12 +4,15 @@
   "stable": true,
   "homepage": "https://github.com/duart38/Thread",
   "entry": "./Thread.ts",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "releaseType": "patch",
   "files": [
     "./LICENSE",
     "./README.md",
     "./Thread.ts",
     "./Thread.bundle.js"
-  ]
+  ],
+  "check": true,
+  "ignore": [],
+  "unlisted": false
 }
