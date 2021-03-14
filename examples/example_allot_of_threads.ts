@@ -14,5 +14,5 @@ function tester(){
 }
 
 for(let i = 0; i < count; i++){
-  new Thread(tester).onMessage((d)=>console.log(`thread -> ${i}`)).postMessage(0);
+  new Thread(tester, "module").onMessage((d)=>console.log(`thread -> ${i}`)).postMessage(0);
 }

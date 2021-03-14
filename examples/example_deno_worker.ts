@@ -4,7 +4,7 @@ import Observe from "https://raw.githubusercontent.com/duart38/Observe/master/Ob
 let tr = new Thread((e)=>{
   let t = new Observe(e.data); // observable values
   return t.getValue()
-}, ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.bundle.js'"], true) // true enables deno
+}, "module", ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.bundle.js'"]);
 
 tr.postMessage("bing");
 

@@ -9,7 +9,7 @@ let thread = new Thread<number>((e: MessageEvent) => {
     console.log("Worker: Posting message back to main script");
     return (result);
   }
-});
+}, "module");
 
 thread.onMessage((e) => {
   console.log(`recived back from thread: ${e}`);
