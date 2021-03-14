@@ -9,10 +9,10 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("incorrect file extension throws error", (): void => {
     assertThrows(()=>{
-        let tr = new Thread((e)=>{return 1}, ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.ts'"], true);
+        let tr = new Thread((e)=>{return 1}, "module", ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.ts'"]);
     });
     assertThrows(()=>{
-        let tr = new Thread((e)=>{return 1}, ["import {cleanWorkerFolder} from './utils.ts'"]);
+        let tr = new Thread((e)=>{return 1}, "module", ["import {cleanWorkerFolder} from './utils.ts'"]);
     });
   })
 
@@ -20,7 +20,7 @@ import { returnNumber } from "./test_import.js";
   Deno.test("Worker takes in external function", async () => {
     let run = new Promise((resolve)=>{
       function testfunc(){return 1}
-      let t = new Thread(testfunc);
+      let t = new Thread(testfunc, "module");
       t.onMessage((n)=>{
         t.remove()?.then(()=>resolve(n));
       });
@@ -31,7 +31,7 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("Command/Method chaining works", async () => {
     let run = new Promise((resolve)=>{
-      let t = new Thread((e)=>0);
+      let t = new Thread((e)=>0, "module");
       t.onMessage((n)=>{
         t.remove()?.then(()=>resolve(n));
       });
@@ -42,7 +42,7 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("Worker returns message", async () => {
     let run = new Promise((resolve)=>{
-      let t =  new Thread((e)=>e.data);
+      let t =  new Thread((e)=>e.data, "module");
       t.onMessage((n)=>{
         t.remove()?.then(()=>resolve(n));
       });
@@ -52,7 +52,7 @@ import { returnNumber } from "./test_import.js";
   });
 
   Deno.test("Worker cleans itself up", async() => {
-    let t = new Thread((e)=>0);
+    let t = new Thread((e)=>0, "module");
     await t.remove()
     assertThrows(()=>Deno.readFileSync(t.filePath))
   })
@@ -60,7 +60,7 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("Local file imports work",  async () => {
     let run = new Promise((resolve)=>{
-      let t =  new Thread((e)=>returnNumber(), ['import {returnNumber} from "./test_import.js"']);
+      let t =  new Thread((e)=>returnNumber(), "module", ['import {returnNumber} from "./test_import.js"']);
       t.onMessage((n)=>{
         t.remove()?.then(()=>resolve(n));
       });
@@ -71,7 +71,7 @@ import { returnNumber } from "./test_import.js";
 
   Deno.test("Over the new file imports work",  async () => {
     let run = new Promise((resolve)=>{
-      let t =  new Thread((e)=> returnNumber(), ['import { returnNumber } from "https://raw.githubusercontent.com/duart38/Thread/master/test_import.js"']);
+      let t =  new Thread((e)=> returnNumber(), "module", ['import { returnNumber } from "https://raw.githubusercontent.com/duart38/Thread/master/test_import.js"']);
       t.onMessage((n)=>{
         t.remove()?.then(()=>resolve(n));
       });
