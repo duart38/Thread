@@ -2,6 +2,10 @@
   "name": "Thread",
   "description": "Type-safe multi-threading made 'easier'",
   "stable": true,
+  "homepage": "https://github.com/duart38/Thread",
+  "entry": "./Thread.ts",
+  "version": "2.3.0",
+  "releaseType": "patch",
   "files": [
     "./LICENSE",
     "./README.md",

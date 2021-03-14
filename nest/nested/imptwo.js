@@ -1,3 +1,3 @@
-export function printer(str){
-    console.log(str)
+export function printer(str) {
+  console.log(str);
 }

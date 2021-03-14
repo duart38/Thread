@@ -25,13 +25,18 @@ export default class Thread<T> {
     });
     this.imports = imports || [];
     this.filePath = this.createFile();
-    this.createImportsFolder()
+    this.createImportsFolder();
     this.populateFile(operation);
     this.workerURL = new URL(this.filePath, import.meta.url);
 
-    this.worker = new Worker(this.workerURL.href.startsWith("http") ? "file:"+this.workerURL.pathname : this.workerURL.href, {
-      type
-    });
+    this.worker = new Worker(
+      this.workerURL.href.startsWith("http")
+        ? "file:" + this.workerURL.pathname
+        : this.workerURL.href,
+      {
+        type,
+      },
+    );
   }
   /**
    * Creates the file that will house our worker
@@ -45,8 +50,10 @@ export default class Thread<T> {
    * Creates folder in temp directory to house our imported files.
    * This is purely to make cleanup easier
    */
-  private createImportsFolder(){
-    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", {recursive: true})
+  private createImportsFolder() {
+    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", {
+      recursive: true,
+    });
   }
 
   private populateFile(code: Function) {
@@ -82,12 +89,15 @@ onmessage = function(e) {
     ) {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
-      
     }
     var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
-    
-    if(!matchedIns) throw new Error("The import instruction seems to be unreadable try formatting it, for example: \n"
-    +"import { something } from './somet.js' \n ")
+
+    if (!matchedIns) {
+      throw new Error(
+        "The import instruction seems to be unreadable try formatting it, for example: \n" +
+          "import { something } from './somet.js' \n ",
+      );
+    }
 
     if (file) {
       this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`); // returns the full path.
@@ -108,7 +118,7 @@ onmessage = function(e) {
    * Sends data to the Thread
    * @param msg 
    */
-  public postMessage(msg: any): this{
+  public postMessage(msg: any): this {
     this.worker.postMessage(msg);
     return this;
   }
@@ -125,12 +135,12 @@ onmessage = function(e) {
    * Removes the current worker file from the temporary folder
    * NOTE: Can be used while the program is running (calls stop()..)
    */
-  public remove(){
-    if(this.stopped == false) this.stop();
-    try{
-      return Deno.remove(this.filePath, {recursive: true});
-    }catch(err){
-      console.error(`Failed to remove worker file: ${this.filePath}`)
+  public remove() {
+    if (this.stopped == false) this.stop();
+    try {
+      return Deno.remove(this.filePath, { recursive: true });
+    } catch (err) {
+      console.error(`Failed to remove worker file: ${this.filePath}`);
       console.error(err);
       return Promise.reject(`Failed to remove worker file: ${this.filePath}`);
     }
