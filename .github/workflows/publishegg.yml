@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Deno
-        uses: denolib/setup-deno@v2
+        uses: denolib/setup-deno@v2.3.0
 
       - name: Publish module
         run: |
