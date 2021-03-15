@@ -14,7 +14,7 @@
 4. Supports Deno unstable features
 5. Allows module imports inside the worker
 
-## example
+## Example
 ```typescript
 let thread = new Thread<number>((e: MessageEvent)=>{
     console.log('Worker: Message received from main script');
