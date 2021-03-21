@@ -14,7 +14,7 @@ export default class Thread<T> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent) => T,
+    operation: (e: MessageEvent, window?:{}) => T,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
@@ -62,10 +62,12 @@ export default class Thread<T> {
       this.filePath,
       `
 ${this.importsMod.join("\n")}
+
+var global = {};
 var userCode = ${code.toString()}
 
 onmessage = function(e) {
-    postMessage(userCode(e));
+    postMessage(userCode(e, global));
 }
 
 `,

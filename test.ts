@@ -94,3 +94,14 @@ Deno.test("Over the new file imports work", async () => {
   });
   assertEquals(await run, 1);
 });
+
+Deno.test("Worker has global object", async () => {
+  let run = new Promise<{} | undefined>((resolve) => {
+    let t = new Thread((e, glob) => glob, "module");
+    t.onMessage((n) => {
+      t.remove()?.then(() => resolve(n));
+    });
+    t.postMessage(0);
+  });
+  assertEquals(await run, {});
+});
