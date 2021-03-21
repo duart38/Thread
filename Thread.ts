@@ -34,7 +34,7 @@ export default class Thread<T> {
         ? "file:" + this.workerURL.pathname
         : this.workerURL.href,
       {
-        type,
+        type: type || "module",
       },
     );
   }
