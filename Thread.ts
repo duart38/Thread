@@ -14,7 +14,7 @@ export default class Thread<T> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent, window?:{}) => T,
+    operation: (e: MessageEvent, globalObject?:{}) => T,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
