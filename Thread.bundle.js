@@ -12,8 +12,6 @@ class Thread {
         });
         this.imports = imports || [];
         this.blob = this.populateFile(operation);
-        this.blob.then(async (b)=>console.log(await b.text())
-        );
         this.worker = this.makeWorker(type1);
     }
     async makeWorker(type) {

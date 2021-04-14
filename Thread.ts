@@ -24,7 +24,6 @@ export default class Thread<T> {
     });
     this.imports = imports || [];
     this.blob = this.populateFile(operation);
-    this.blob.then(async (b)=>console.log(await b.text()));
     this.worker = this.makeWorker(type);
   }
 
