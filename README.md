@@ -48,8 +48,7 @@ new Thread(someFunction, "module", ['import Something from "../some.bundle.js";'
 
 ### Standard API
 | Method / variable                  	| Description                                                                                                                	|
-|------------------------------------	|----------------------------------------------------------------------------------------------------------------------------	|
-| filePath                           	| The full path to the worker file (in temp dir)                                                                             	|
+|------------------------------------	|----------------------------------------------------------------------------------------------------------------------------
 | worker                             	| The Worker.                                                                                                                	|
 | stopped                            	| Tells if the worker has been stopped                                                                                       	|
 | postMessage(msg)                   	| Sends data to the Thread                                                                                                   	|
