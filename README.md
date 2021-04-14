@@ -56,9 +56,3 @@ new Thread(someFunction, "module", ['import Something from "../some.bundle.js";'
 | stop()                             	| calls terminate on the worker.                                                                                             	|
 | remove()                           	| Removes the current worker file from the temporary folder. NOTE: Can be used while the program is running (calls stop()..) 	|
 | onMessage(callback: (e: T) =>void) 	| Bind to the worker to receive messages                                                                                     	|
-
-### Utilities
-
-| Method / variable    	| Description                                                                                                         	|
-|----------------------	|---------------------------------------------------------------------------------------------------------------------	|
-| cleanWorkerImports() 	| Removes all worker related imports from the temp folder.<br>WARNING: Do not run this while your program is running. 	|

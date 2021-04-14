@@ -16,15 +16,6 @@ Deno.test("incorrect file extension throws error", (): void => {
       ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.ts'"],
     );
   });
-  assertThrows(() => {
-    let tr = new Thread(
-      (e) => {
-        return 1;
-      },
-      "module",
-      ["import {cleanWorkerFolder} from './utils.ts'"],
-    );
-  });
 });
 
 Deno.test("Worker takes in external function", async () => {
