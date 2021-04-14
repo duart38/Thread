@@ -1,4 +1,3 @@
-import Observe from "https://raw.githubusercontent.com/duart38/Observe/master/Observe.bundle.js";
 import { add } from "./nest/impone.js";
 
 export function CallMe() {

@@ -63,11 +63,6 @@ Deno.test("Worker returns message", async () => {
   assertEquals(await run, 2);
 });
 
-Deno.test("Worker cleans itself up", async () => {
-  let t = new Thread((e) => 0, "module");
-  await t.remove();
-  assertThrows(() => Deno.readFileSync(t.filePath));
-});
 
 Deno.test("Local file imports work", async () => {
   let run = new Promise((resolve) => {

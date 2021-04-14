@@ -1,9 +1,8 @@
 export default class Thread<T> {
-  public filePath: string;
-  private workerURL: URL;
-  public worker: Worker;
+  public worker: Promise<Worker>;
   private imports: Array<string>;
-  private importsMod: Array<string> = [];
+  private blob: Promise<Blob>;
+  private blobURL: string = "";
   /**
    * Tells if the worker has been stopped
    */
@@ -24,61 +23,41 @@ export default class Thread<T> {
       }
     });
     this.imports = imports || [];
-    this.filePath = this.createFile();
-    this.createImportsFolder();
-    this.populateFile(operation);
-    this.workerURL = new URL(this.filePath, import.meta.url);
+    this.blob = this.populateFile(operation);
+    this.blob.then(async (b)=>console.log(await b.text()));
+    this.worker = this.makeWorker(type);
+  }
 
-    this.worker = new Worker(
-      this.workerURL.href.startsWith("http")
-        ? "file:" + this.workerURL.pathname
-        : this.workerURL.href,
+  private async makeWorker(type?: "classic" | "module"){
+    this.blobURL = URL.createObjectURL(await this.blob)
+    return new Worker(
+      this.blobURL,
       {
         type: type || "module",
       },
     );
   }
-  /**
-   * Creates the file that will house our worker
-   */
-  private createFile(): string {
-    return Deno.makeTempFileSync(
-      { prefix: "deno_thread_", suffix: ".js" },
-    );
-  }
-  /**
-   * Creates folder in temp directory to house our imported files.
-   * This is purely to make cleanup easier
-   */
-  private createImportsFolder() {
-    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", {
-      recursive: true,
-    });
-  }
 
-  private populateFile(code: Function) {
-    this.imports?.forEach((val) => this.copyDep(val));
-    Deno.writeTextFileSync(
-      this.filePath,
-      `
-${this.importsMod.join("\n")}
-
-var global = {};
-var userCode = ${code.toString()}
-
-onmessage = function(e) {
-    postMessage(userCode(e, global));
-}
-
-`,
-    );
+  private async populateFile(code: Function) {
+    let imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
+    return new Blob([`
+    ${(await Promise.all(imported)).join("\n")}
+    
+    var global = {};
+    var userCode = ${code.toString()}
+    
+    onmessage = function(e) {
+        postMessage(userCode(e, global));
+    }
+    
+    `]);
   }
 
   /**
    * Handles a single import line
    * @param str the import line (eg: import {som} from "lorem/ipsum.js";)
    */
-  private copyDep(str: string) {
+  private async copyDep(str: string) {
     var importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
     var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
     var matchedPath = importPathRegex.exec(str) || "";
@@ -101,19 +80,14 @@ onmessage = function(e) {
       );
     }
 
+    
     if (file) {
-      this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`); // returns the full path.
+      let x = await import(fqfn); //Deno.realPathSync(fqfn)
+      return Object.keys(x).map((v)=>x[v].toString())
     } else {
-      this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
+      let x = await import(matchedPath[0].replaceAll(/'|"/g,""));
+      return Object.keys(x).map((v)=>x[v].toString())
     }
-  }
-
-  /**
-   * Get the location of the temporary folder by checking the file name.
-   */
-  private getTempFolder() {
-    let t = this.filePath;
-    return t.replace(/(\/\w+.js)/ig, "/");
   }
 
   /**
@@ -121,31 +95,25 @@ onmessage = function(e) {
    * @param msg 
    */
   public postMessage(msg: any): this {
-    this.worker.postMessage(msg);
+    this.worker.then(w=>w.postMessage(msg));
     return this;
   }
 
   /**
    * Handbrakes are very handy you know
    */
-  public stop() {
+  public async stop() {
     this.stopped = true;
-    this.worker.terminate();
+    (await this.worker).terminate();
   }
 
   /**
-   * Removes the current worker file from the temporary folder
+   * Stops the worker and revokes the blob URL.
    * NOTE: Can be used while the program is running (calls stop()..)
    */
-  public remove() {
-    if (this.stopped == false) this.stop();
-    try {
-      return Deno.remove(this.filePath, { recursive: true });
-    } catch (err) {
-      console.error(`Failed to remove worker file: ${this.filePath}`);
-      console.error(err);
-      return Promise.reject(`Failed to remove worker file: ${this.filePath}`);
-    }
+  public async remove() {
+    if (this.stopped == false) await this.stop();
+    URL.revokeObjectURL(this.blobURL);
   }
 
   /**
@@ -153,7 +121,7 @@ onmessage = function(e) {
    * @param callback Function that is called when the worker sends data back
    */
   public onMessage(callback: (e: T) => void): this {
-    this.worker.onmessage = (e) => callback(e.data);
+    this.worker.then(w=>w.onmessage = (e) => callback(e.data));
     return this;
   }
 }
