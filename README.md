@@ -11,7 +11,6 @@
 1. This module allows you to write **Web Worker** code inline with the rest of your code
 2. This module is also somewhat type safe
 3. Allows you to Thread already existing functions
-4. Supports Deno unstable features
 5. Allows module imports inside the worker
 
 ## Example

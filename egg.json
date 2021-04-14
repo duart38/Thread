@@ -4,7 +4,7 @@
   "stable": true,
   "homepage": "https://github.com/duart38/Thread",
   "entry": "./Thread.ts",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "releaseType": "patch",
   "files": [
     "./LICENSE",

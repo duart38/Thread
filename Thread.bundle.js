@@ -1,103 +1,75 @@
-const importMeta = {
-  url: "file:///Users/duartasnel/Local/personal_projects/runLater/Thread.ts",
-  main: import.meta.main,
-};
 class Thread {
-  importsMod = [];
-  stopped = false;
-  constructor(operation, type, imports) {
-    imports?.forEach((v) => {
-      if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
-        throw new Error("Threaded imports do no support typescript files");
-      }
-    });
-    this.imports = imports || [];
-    this.filePath = this.createFile();
-    this.createImportsFolder();
-    this.populateFile(operation);
-    this.workerURL = new URL(this.filePath, importMeta.url);
-    this.worker = new Worker(
-      this.workerURL.href.startsWith("http")
-        ? "file:" + this.workerURL.pathname
-        : this.workerURL.href,
-      {
-        type,
-      },
-    );
-  }
-  createFile() {
-    return Deno.makeTempFileSync({
-      prefix: "deno_thread_",
-      suffix: ".js",
-    });
-  }
-  createImportsFolder() {
-    Deno.mkdirSync(this.getTempFolder() + "threaded_imports", {
-      recursive: true,
-    });
-  }
-  populateFile(code) {
-    this.imports?.forEach((val) => this.copyDep(val));
-    Deno.writeTextFileSync(
-      this.filePath,
-      `\n${
-        this.importsMod.join("\n")
-      }\nvar userCode = ${code.toString()}\n\nonmessage = function(e) {\n    postMessage(userCode(e));\n}\n\n`,
-    );
-  }
-  copyDep(str) {
-    var importPathRegex = /('|"|`)(.+\.js)(\1)/ig;
-    var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig;
-    var matchedPath = importPathRegex.exec(str) || "";
-    var file = false;
-    var fqfn = "";
-    if (
-      !matchedPath[0].includes("http://") &&
-      !matchedPath[0].includes("https://")
-    ) {
-      file = true;
-      fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+    worker;
+    imports;
+    blob;
+    blobURL = "";
+    stopped = false;
+    constructor(operation, type1, imports){
+        imports?.forEach((v)=>{
+            if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
+                throw new Error("Threaded imports do no support typescript files");
+            }
+        });
+        this.imports = imports || [];
+        this.blob = this.populateFile(operation);
+        this.blob.then(async (b)=>console.log(await b.text())
+        );
+        this.worker = this.makeWorker(type1);
     }
-    var matchedIns = importInsRegex.exec(str) || "";
-    if (!matchedIns) {
-      throw new Error(
-        "The import instruction seems to be unreadable try formatting it, for example: \n" +
-          "import { something } from './somet.js' \n ",
-      );
+    async makeWorker(type) {
+        this.blobURL = URL.createObjectURL(await this.blob);
+        return new Worker(this.blobURL, {
+            type: type || "module"
+        });
     }
-    if (file) {
-      this.importsMod.push(`${matchedIns[0]} "${Deno.realPathSync(fqfn)}"`);
-    } else {
-      this.importsMod.push(`${matchedIns[0]} ${matchedPath[0]}`);
+    async populateFile(code) {
+        let imported = this.imports?.flatMap(async (val)=>(await this.copyDep(val)).join("\n")
+        );
+        return new Blob([
+            `\n    ${(await Promise.all(imported)).join("\n")}\n    \n    var global = {};\n    var userCode = ${code.toString()}\n    \n    onmessage = function(e) {\n        postMessage(userCode(e, global));\n    }\n    \n    `
+        ]);
     }
-  }
-  getTempFolder() {
-    let t = this.filePath;
-    return t.replace(/(\/\w+.js)/ig, "/");
-  }
-  postMessage(msg) {
-    this.worker.postMessage(msg);
-    return this;
-  }
-  stop() {
-    this.stopped = true;
-    this.worker.terminate();
-  }
-  remove() {
-    if (this.stopped == false) this.stop();
-    try {
-      return Deno.remove(this.filePath, {
-        recursive: true,
-      });
-    } catch (err) {
-      console.error(`Failed to remove worker file: ${this.filePath}`);
-      console.error(err);
-      return Promise.reject(`Failed to remove worker file: ${this.filePath}`);
+    async copyDep(str) {
+        var importPathRegex = /('|"|`)(.+\.js)(\1)/ig;
+        var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig;
+        var matchedPath = importPathRegex.exec(str) || "";
+        var file = false;
+        var fqfn = "";
+        if (!matchedPath[0].includes("http://") && !matchedPath[0].includes("https://")) {
+            file = true;
+            fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+        }
+        var matchedIns = importInsRegex.exec(str) || "";
+        if (!matchedIns) {
+            throw new Error("The import instruction seems to be unreadable try formatting it, for example: \n" + "import { something } from './somet.js' \n ");
+        }
+        if (file) {
+            let x = await import(fqfn);
+            return Object.keys(x).map((v)=>x[v].toString()
+            );
+        } else {
+            let x = await import(matchedPath[0].replaceAll(/'|"/g, ""));
+            return Object.keys(x).map((v)=>x[v].toString()
+            );
+        }
     }
-  }
-  onMessage(callback) {
-    this.worker.onmessage = (e) => callback(e.data);
-    return this;
-  }
+    postMessage(msg) {
+        this.worker.then((w)=>w.postMessage(msg)
+        );
+        return this;
+    }
+    async stop() {
+        this.stopped = true;
+        (await this.worker).terminate();
+    }
+    async remove() {
+        if (this.stopped == false) await this.stop();
+        URL.revokeObjectURL(this.blobURL);
+    }
+    onMessage(callback) {
+        this.worker.then((w)=>w.onmessage = (e)=>callback(e.data)
+        );
+        return this;
+    }
 }
 export { Thread as default };
