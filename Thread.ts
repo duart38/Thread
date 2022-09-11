@@ -2,7 +2,7 @@ export default class Thread<T> {
   public worker: Promise<Worker>;
   private imports: Array<string>;
   private blob: Promise<Blob>;
-  private blobURL: string = "";
+  private blobURL= "";
   /**
    * Tells if the worker has been stopped
    */
@@ -13,7 +13,7 @@ export default class Thread<T> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent, globalObject?:{}) => T,
+    operation: (e: MessageEvent, globalObject?:{}) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
@@ -45,8 +45,8 @@ export default class Thread<T> {
     var global = {};
     var userCode = ${code.toString()}
     
-    onmessage = function(e) {
-        postMessage(userCode(e, global));
+    onmessage = async function(e) {
+        postMessage(await userCode(e, global));
     }
     
     `]);
