@@ -1,11 +1,10 @@
 import Thread from "../Thread.ts";
 
-let count = 13;
+const count = 13;
 
-function postMessage(e: any) {}
+function postMessage(_e: unknown) {}
 
 function tester() {
-  let i = 0;
   setInterval(() => {
     postMessage(0);
   }, 500);
@@ -14,6 +13,6 @@ function tester() {
 }
 
 for (let i = 0; i < count; i++) {
-  new Thread(tester, "module").onMessage((d) => console.log(`thread -> ${i}`))
+  new Thread(tester, "module").onMessage((_) => console.log(`thread -> ${i}`))
     .postMessage(0);
 }

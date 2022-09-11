@@ -13,7 +13,9 @@
 3. Allows you to Thread already existing functions
 5. Allows module imports inside the worker
 
-## Example
+## Examples
+> See examples folder for more examples
+
 ```typescript
 let thread = new Thread<number>((e: MessageEvent)=>{
     console.log('Worker: Message received from main script');
@@ -42,6 +44,22 @@ function someFunction(e: MessageEvent){
 new Thread((e: MessageEvent)=>{return 0}, "module"); // inline Thread with return type of number
 new Thread(someFunction, "module"); // thread an already existing function
 new Thread(someFunction, "module", ['import Something from "../some.bundle.js";']); // thread with custom importing
+```
+
+**Async support**
+```TypeScript
+const thread = new Thread<string, number>(async (_) => {
+  console.log("Worker: Message received from main script");
+  // Some async logic...
+  await new Promise((ir) => setTimeout(ir, 2000));
+  return "DONE";
+}, "module");
+
+thread.onMessage((e) => {
+  console.log(`recived back from thread: ${e}`);
+});
+
+thread.postMessage(0);
 ```
 
 ## API

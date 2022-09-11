@@ -1,8 +1,13 @@
-export default class Thread<T> {
+/**
+ * > Type T -> return type
+ * 
+ * > Type K -> data type of MessageEvent
+ */
+export default class Thread<T = unknown, K = unknown> {
   public worker: Promise<Worker>;
   private imports: Array<string>;
   private blob: Promise<Blob>;
-  private blobURL: string = "";
+  private blobURL= "";
   /**
    * Tells if the worker has been stopped
    */
@@ -13,7 +18,7 @@ export default class Thread<T> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent, globalObject?:{}) => T,
+    operation: (e: MessageEvent<K>, globalObject?: Record<string, unknown>) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
@@ -24,7 +29,6 @@ export default class Thread<T> {
     });
     this.imports = imports || [];
     this.blob = this.populateFile(operation);
-    this.blob.then(async (b)=>console.log(await b.text()));
     this.worker = this.makeWorker(type);
   }
 
@@ -38,16 +42,17 @@ export default class Thread<T> {
     );
   }
 
+  // deno-lint-ignore ban-types
   private async populateFile(code: Function) {
-    let imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
+    const imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
     return new Blob([`
     ${(await Promise.all(imported)).join("\n")}
     
     var global = {};
     var userCode = ${code.toString()}
     
-    onmessage = function(e) {
-        postMessage(userCode(e, global));
+    onmessage = async function(e) {
+        postMessage(await userCode(e, global));
     }
     
     `]);
@@ -58,11 +63,11 @@ export default class Thread<T> {
    * @param str the import line (eg: import {som} from "lorem/ipsum.js";)
    */
   private async copyDep(str: string) {
-    var importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
-    var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
-    var matchedPath = importPathRegex.exec(str) || "";
-    var file = false;
-    var fqfn = "";
+    const importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
+    const importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
+    const matchedPath = importPathRegex.exec(str) || "";
+    let file = false;
+    let fqfn = "";
 
     if (
       !matchedPath[0].includes("http://") &&
@@ -71,7 +76,7 @@ export default class Thread<T> {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
     }
-    var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
+    const matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (!matchedIns) {
       throw new Error(
@@ -82,10 +87,10 @@ export default class Thread<T> {
 
     
     if (file) {
-      let x = await import(fqfn); //Deno.realPathSync(fqfn)
+      const x = await import(fqfn); //Deno.realPathSync(fqfn)
       return Object.keys(x).map((v)=>x[v].toString())
     } else {
-      let x = await import(matchedPath[0].replaceAll(/'|"/g,""));
+      const x = await import(matchedPath[0].replaceAll(/'|"/g,""));
       return Object.keys(x).map((v)=>x[v].toString())
     }
   }
@@ -94,7 +99,7 @@ export default class Thread<T> {
    * Sends data to the Thread
    * @param msg 
    */
-  public postMessage(msg: any): this {
+  public postMessage(msg: K): this {
     this.worker.then(w=>w.postMessage(msg));
     return this;
   }

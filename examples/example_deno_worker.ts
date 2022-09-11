@@ -1,9 +1,9 @@
 import Thread from "../Thread.ts";
 import Observe from "https://raw.githubusercontent.com/duart38/Observe/master/Observe.ts";
 
-let tr = new Thread(
+const tr = new Thread<string, string>(
   (e) => {
-    let t = new Observe(e.data); // observable values
+    const t = new Observe(e.data); // observable values
     return t.getValue();
   },
   "module",

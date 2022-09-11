@@ -1,8 +1,8 @@
 import Thread from "../Thread.ts";
 import { CallMe } from "../test_import.js";
 
-let tr = new Thread(
-  (e) => {
+const tr = new Thread(
+  (_e) => {
     CallMe();
     return "pong";
   },
