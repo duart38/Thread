@@ -5,7 +5,6 @@ let count = 13;
 function postMessage(e: any) {}
 
 function tester() {
-  let i = 0;
   setInterval(() => {
     postMessage(0);
   }, 500);
