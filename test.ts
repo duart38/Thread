@@ -32,6 +32,20 @@ Deno.test("Worker takes in external function", async () => {
   assertEquals(await run, 1);
 });
 
+Deno.test("Worker async function supported", async () => {
+  let run = new Promise((resolve) => {
+    let t = new Thread(async ()=>{
+      await new Promise((ir) => setTimeout(ir, 1000))
+      return 1;
+    }, "module");
+    t.onMessage((n) => {
+      t.remove()?.then(() => resolve(n));
+    });
+    t.postMessage(2);
+  });
+  assertEquals(await run, 1);
+});
+
 Deno.test("Command/Method chaining works", async () => {
   let run = new Promise((resolve) => {
     let t = new Thread((e) => 0, "module");
