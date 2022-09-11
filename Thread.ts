@@ -93,7 +93,7 @@ export default class Thread<T = unknown, K = unknown> {
    * Sends data to the Thread
    * @param msg 
    */
-  public postMessage(msg: any): this {
+  public postMessage(msg: K): this {
     this.worker.then(w=>w.postMessage(msg));
     return this;
   }
