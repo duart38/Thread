@@ -1,15 +1,14 @@
 import {
   assertEquals,
-  assertThrows,
-  fail,
+  assertThrows
 } from "https://deno.land/std@0.90.0/testing/asserts.ts";
 import Thread from "./Thread.ts";
 import { returnNumber } from "./test_import.js";
 
 Deno.test("incorrect file extension throws error", (): void => {
   assertThrows(() => {
-    let tr = new Thread(
-      (e) => {
+    const _tr = new Thread(
+      (_) => {
         return 1;
       },
       "module",
@@ -19,11 +18,11 @@ Deno.test("incorrect file extension throws error", (): void => {
 });
 
 Deno.test("Worker takes in external function", async () => {
-  let run = new Promise((resolve) => {
+  const run = new Promise((resolve) => {
     function testfunc() {
       return 1;
     }
-    let t = new Thread(testfunc, "module");
+    const t = new Thread(testfunc, "module");
     t.onMessage((n) => {
       t.remove()?.then(() => resolve(n));
     });
@@ -33,8 +32,8 @@ Deno.test("Worker takes in external function", async () => {
 });
 
 Deno.test("Worker async function supported", async () => {
-  let run = new Promise((resolve) => {
-    let t = new Thread(async ()=>{
+  const run = new Promise((resolve) => {
+    const t = new Thread(async ()=>{
       await new Promise((ir) => setTimeout(ir, 1000))
       return 1;
     }, "module");
@@ -47,8 +46,8 @@ Deno.test("Worker async function supported", async () => {
 });
 
 Deno.test("Command/Method chaining works", async () => {
-  let run = new Promise((resolve) => {
-    let t = new Thread((e) => 0, "module");
+  const run = new Promise((resolve) => {
+    const t = new Thread((_) => 0, "module");
     t.onMessage((n) => {
       t.remove()?.then(() => resolve(n));
     });
@@ -58,8 +57,8 @@ Deno.test("Command/Method chaining works", async () => {
 });
 
 Deno.test("Worker returns message", async () => {
-  let run = new Promise((resolve) => {
-    let t = new Thread((e) => e.data, "module");
+  const run = new Promise((resolve) => {
+    const t = new Thread((e) => e.data, "module");
     t.onMessage((n) => {
       t.remove()?.then(() => resolve(n));
     });
@@ -70,8 +69,8 @@ Deno.test("Worker returns message", async () => {
 
 
 Deno.test("Local file imports work", async () => {
-  let run = new Promise((resolve) => {
-    let t = new Thread((e) => returnNumber(), "module", [
+  const run = new Promise((resolve) => {
+    const t = new Thread((_) => returnNumber(), "module", [
       'import {returnNumber} from "./test_import.js"',
     ]);
     t.onMessage((n) => {
@@ -83,8 +82,8 @@ Deno.test("Local file imports work", async () => {
 });
 
 Deno.test("Over the network file imports work", async () => {
-  let run = new Promise((resolve) => {
-    let t = new Thread((e) => returnNumber(), "module", [
+  const run = new Promise((resolve) => {
+    const t = new Thread((_) => returnNumber(), "module", [
       'import { returnNumber } from "https://raw.githubusercontent.com/duart38/Thread/master/test_import.js"',
     ]);
     t.onMessage((n) => {
@@ -96,8 +95,9 @@ Deno.test("Over the network file imports work", async () => {
 });
 
 Deno.test("Worker has global object", async () => {
-  let run = new Promise<{} | undefined>((resolve) => {
-    let t = new Thread((_, glob) => glob, "module");
+  // deno-lint-ignore ban-types
+  const run = new Promise<{} | undefined>((resolve) => {
+    const t = new Thread((_, glob) => glob, "module");
     t.onMessage((n) => {
       t.remove()?.then(() => resolve(n));
     });
