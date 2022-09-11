@@ -38,7 +38,7 @@ export default class Thread<T> {
   }
 
   private async populateFile(code: Function) {
-    let imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
+    const imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
     return new Blob([`
     ${(await Promise.all(imported)).join("\n")}
     
@@ -57,11 +57,11 @@ export default class Thread<T> {
    * @param str the import line (eg: import {som} from "lorem/ipsum.js";)
    */
   private async copyDep(str: string) {
-    var importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
-    var importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
-    var matchedPath = importPathRegex.exec(str) || "";
-    var file = false;
-    var fqfn = "";
+    const importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
+    const importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
+    const matchedPath = importPathRegex.exec(str) || "";
+    let file = false;
+    let fqfn = "";
 
     if (
       !matchedPath[0].includes("http://") &&
@@ -70,7 +70,7 @@ export default class Thread<T> {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
     }
-    var matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
+    const matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
     if (!matchedIns) {
       throw new Error(
@@ -81,10 +81,10 @@ export default class Thread<T> {
 
     
     if (file) {
-      let x = await import(fqfn); //Deno.realPathSync(fqfn)
+      const x = await import(fqfn); //Deno.realPathSync(fqfn)
       return Object.keys(x).map((v)=>x[v].toString())
     } else {
-      let x = await import(matchedPath[0].replaceAll(/'|"/g,""));
+      const x = await import(matchedPath[0].replaceAll(/'|"/g,""));
       return Object.keys(x).map((v)=>x[v].toString())
     }
   }
