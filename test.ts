@@ -68,7 +68,7 @@ Deno.test("Local file imports work", async () => {
   assertEquals(await run, 1);
 });
 
-Deno.test("Over the new file imports work", async () => {
+Deno.test("Over the network file imports work", async () => {
   let run = new Promise((resolve) => {
     let t = new Thread((e) => returnNumber(), "module", [
       'import { returnNumber } from "https://raw.githubusercontent.com/duart38/Thread/master/test_import.js"',
