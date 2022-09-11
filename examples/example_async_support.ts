@@ -6,7 +6,7 @@ import Thread from "../Thread.ts";
  * -> https://github.com/duart38/Thread/issues/3
  */
 
-const thread = new Thread<number>(async (e: MessageEvent) => {
+const thread = new Thread<number, number[]>(async (e) => {
   console.log("Worker: Message received from main script");
   const result = e.data[0] * e.data[1];
   await new Promise((resolve) => setTimeout(resolve, 5 * 1000))
