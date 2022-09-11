@@ -1,6 +1,6 @@
 import Thread from "../Thread.ts";
 
-let thread = new Thread<number>((e: MessageEvent) => {
+const thread = new Thread<number>((e: MessageEvent) => {
   console.log("Worker: Message received from main script");
   const result = e.data[0] * e.data[1];
   if (isNaN(result)) {
