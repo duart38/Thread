@@ -97,7 +97,7 @@ Deno.test("Over the network file imports work", async () => {
 
 Deno.test("Worker has global object", async () => {
   let run = new Promise<{} | undefined>((resolve) => {
-    let t = new Thread((e, glob) => glob, "module");
+    let t = new Thread((_, glob) => glob, "module");
     t.onMessage((n) => {
       t.remove()?.then(() => resolve(n));
     });
