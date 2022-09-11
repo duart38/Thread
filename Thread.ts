@@ -1,3 +1,8 @@
+/**
+ * > Type T -> return type
+ * 
+ * > Type K -> data type of MessageEvent
+ */
 export default class Thread<T = unknown, K = unknown> {
   public worker: Promise<Worker>;
   private imports: Array<string>;
