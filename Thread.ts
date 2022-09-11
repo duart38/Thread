@@ -1,4 +1,4 @@
-export default class Thread<T> {
+export default class Thread<T = unknown, K = unknown> {
   public worker: Promise<Worker>;
   private imports: Array<string>;
   private blob: Promise<Blob>;
@@ -13,7 +13,7 @@ export default class Thread<T> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent, globalObject?:{}) => T | Promise<T>,
+    operation: (e: MessageEvent<K>, globalObject?:{}) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
