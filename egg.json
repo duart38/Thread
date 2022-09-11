@@ -1,18 +1,22 @@
 {
+  "$schema": "https://x.nest.land/eggs@0.3.10/src/schema.json",
   "name": "Thread",
-  "description": "Type-safe multi-threading made 'easier'",
-  "stable": true,
-  "homepage": "https://github.com/duart38/Thread",
   "entry": "./Thread.ts",
+  "description": "Type-safe multi-threading made 'easier'",
+  "homepage": "https://github.com/duart38/Thread",
   "version": "4.0.0",
-  "releaseType": "major",
+  "releaseType": null,
+  "unstable": false,
+  "unlisted": false,
   "files": [
     "./LICENSE",
     "./README.md",
     "./Thread.ts",
     "./Thread.bundle.js"
   ],
-  "check": true,
   "ignore": [],
-  "unlisted": false
+  "checkFormat": false,
+  "checkTests": false,
+  "checkInstallation": false,
+  "check": true
 }
