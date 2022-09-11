@@ -4,8 +4,8 @@
   "stable": true,
   "homepage": "https://github.com/duart38/Thread",
   "entry": "./Thread.ts",
-  "version": "3.0.0",
-  "releaseType": "patch",
+  "version": "4.0.0",
+  "releaseType": "major",
   "files": [
     "./LICENSE",
     "./README.md",
