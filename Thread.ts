@@ -18,7 +18,7 @@ export default class Thread<T = unknown, K = unknown> {
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent<K>, globalObject?:{}) => T | Promise<T>,
+    operation: (e: MessageEvent<K>, globalObject?: Record<string, unknown>) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
@@ -42,6 +42,7 @@ export default class Thread<T = unknown, K = unknown> {
     );
   }
 
+  // deno-lint-ignore ban-types
   private async populateFile(code: Function) {
     const imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
     return new Blob([`

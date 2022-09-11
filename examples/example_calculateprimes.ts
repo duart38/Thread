@@ -2,7 +2,7 @@ import Thread from "../Thread.ts";
 
 const count = 2; // number of threads to spawn
 
-function postMessage(e: any) {} // stops the compiler from complaining that the method is not available.. this gets pasted in the worker
+function postMessage(_e: unknown) {} // stops the compiler from complaining that the method is not available.. this gets pasted in the worker
 
 function tester() {
   function calculatePrimes() {
