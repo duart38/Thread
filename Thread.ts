@@ -1,39 +1,36 @@
 /**
  * > Type T -> return type
- * 
+ *
  * > Type K -> data type of MessageEvent
  */
 export default class Thread<T = unknown, K = unknown> {
   public worker: Promise<Worker>;
   private imports: Array<string>;
   private blob: Promise<Blob>;
-  private blobURL= "";
+  private blobURL = "";
   /**
    * Tells if the worker has been stopped
    */
   public stopped = false;
   /**
-   * 
    * @param operation The method to be used in the thread
    * @param imports Modules to import in the worker. only JS files allowed (over the net import allowed)
    */
   constructor(
-    operation: (e: MessageEvent<K>, globalObject?: Record<string, unknown>) => T | Promise<T>,
+    operation: (
+      e: MessageEvent<K>,
+      globalObject?: Record<string, unknown>,
+    ) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
   ) {
-    imports?.forEach((v) => {
-      if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
-        throw new Error("Threaded imports do no support typescript files");
-      }
-    });
     this.imports = imports || [];
     this.blob = this.populateFile(operation);
     this.worker = this.makeWorker(type);
   }
 
-  private async makeWorker(type?: "classic" | "module"){
-    this.blobURL = URL.createObjectURL(await this.blob)
+  private async makeWorker(type?: "classic" | "module") {
+    this.blobURL = URL.createObjectURL(await this.blob);
     return new Worker(
       this.blobURL,
       {
@@ -44,7 +41,9 @@ export default class Thread<T = unknown, K = unknown> {
 
   // deno-lint-ignore ban-types
   private async populateFile(code: Function) {
-    const imported = this.imports?.flatMap(async (val) => (await this.copyDep(val)).join("\n"));
+    const imported = this.imports?.flatMap(async (val) =>
+      (await this.copyDep(val)).join("\n")
+    );
     return new Blob([`
     ${(await Promise.all(imported)).join("\n")}
     
@@ -63,7 +62,7 @@ export default class Thread<T = unknown, K = unknown> {
    * @param str the import line (eg: import {som} from "lorem/ipsum.js";)
    */
   private async copyDep(str: string) {
-    const importPathRegex = /('|"|`)(.+\.js)(\1)/ig; // for the path string ("lorem/ipsum.js")
+    const importPathRegex = /('|"|`)(.+(\.js|\.ts))(\1)/ig; // for the path string ("lorem/ipsum.js")
     const importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
     const matchedPath = importPathRegex.exec(str) || "";
     let file = false;
@@ -85,22 +84,25 @@ export default class Thread<T = unknown, K = unknown> {
       );
     }
 
-    
     if (file) {
       const x = await import(fqfn); //Deno.realPathSync(fqfn)
-      return Object.keys(x).map((v)=>x[v].toString())
+      return Object.keys(x).map((v) => x[v].toString());
     } else {
-      const x = await import(matchedPath[0].replaceAll(/'|"/g,""));
-      return Object.keys(x).map((v)=>x[v].toString())
+      const filePath = matchedPath[0].replaceAll(/'|"/g, "");
+      if (filePath.endsWith(".ts")) {
+        return [str]; // dont import the content if ts just paste import string
+      }
+      const x = await import(filePath);
+      return Object.keys(x).map((v) => x[v].toString());
     }
   }
 
   /**
    * Sends data to the Thread
-   * @param msg 
+   * @param msg
    */
   public postMessage(msg: K): this {
-    this.worker.then(w=>w.postMessage(msg));
+    this.worker.then((w) => w.postMessage(msg));
     return this;
   }
 
@@ -126,7 +128,7 @@ export default class Thread<T = unknown, K = unknown> {
    * @param callback Function that is called when the worker sends data back
    */
   public onMessage(callback: (e: T) => void): this {
-    this.worker.then(w=>w.onmessage = (e) => callback(e.data));
+    this.worker.then((w) => w.onmessage = (e) => callback(e.data));
     return this;
   }
 }
