@@ -1,20 +1,25 @@
-import {
-  assertEquals,
-  assertThrows
-} from "https://deno.land/std@0.90.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.90.0/testing/asserts.ts";
 import Thread from "./Thread.ts";
 import { returnNumber } from "./test_import.js";
+import { plus } from "https://deno.land/x/math@v1.1.0/mod.ts";
 
-Deno.test("incorrect file extension throws error", (): void => {
-  assertThrows(() => {
-    const _tr = new Thread(
-      (_) => {
-        return 1;
+Deno.test("Importing ts file over network", async () => {
+  const run = new Promise((resolve) => {
+    const t = new Thread(
+      (e) => {
+        return plus(e.data as number, 1);
       },
       "module",
-      ["import Observe from 'https://raw.githubusercontent.com/duart38/Observe/master/Observe.ts'"],
+      [
+        'import { plus } from "https://deno.land/x/math@v1.1.0/mod.ts"',
+      ],
     );
+    t.onMessage((n) => {
+      t.remove()?.then(() => resolve(n));
+    });
+    t.postMessage(1);
   });
+  assertEquals(await run, "2");
 });
 
 Deno.test("Worker takes in external function", async () => {
@@ -33,8 +38,8 @@ Deno.test("Worker takes in external function", async () => {
 
 Deno.test("Worker async function supported", async () => {
   const run = new Promise((resolve) => {
-    const t = new Thread(async ()=>{
-      await new Promise((ir) => setTimeout(ir, 1000))
+    const t = new Thread(async () => {
+      await new Promise((ir) => setTimeout(ir, 1000));
       return 1;
     }, "module");
     t.onMessage((n) => {
@@ -66,7 +71,6 @@ Deno.test("Worker returns message", async () => {
   });
   assertEquals(await run, 2);
 });
-
 
 Deno.test("Local file imports work", async () => {
   const run = new Promise((resolve) => {
