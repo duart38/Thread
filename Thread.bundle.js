@@ -9,11 +9,6 @@ class Thread {
     blobURL = "";
     stopped = false;
     constructor(operation, type, imports){
-        imports?.forEach((v)=>{
-            if (v.endsWith(".ts'") || v.endsWith('.ts"')) {
-                throw new Error("Threaded imports do no support typescript files");
-            }
-        });
         this.imports = imports || [];
         this.blob = this.populateFile(operation);
         this.worker = this.makeWorker(type);
@@ -41,7 +36,7 @@ class Thread {
         ]);
     }
     async copyDep(str) {
-        const importPathRegex = /('|"|`)(.+\.js)(\1)/ig;
+        const importPathRegex = /('|"|`)(.+(\.js|\.ts))(\1)/ig;
         const importInsRegex = /(import( |))({.+}|.+)(from( |))/ig;
         const matchedPath = importPathRegex.exec(str) || "";
         let file = false;
@@ -58,7 +53,13 @@ class Thread {
             const x = await import(fqfn);
             return Object.keys(x).map((v)=>x[v].toString());
         } else {
-            const x1 = await import(matchedPath[0].replaceAll(/'|"/g, ""));
+            const filePath = matchedPath[0].replaceAll(/'|"/g, "");
+            if (filePath.endsWith(".ts")) {
+                return [
+                    str
+                ];
+            }
+            const x1 = await import(filePath);
             return Object.keys(x1).map((v)=>x1[v].toString());
         }
     }
