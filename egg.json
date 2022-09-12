@@ -4,7 +4,7 @@
   "entry": "./Thread.ts",
   "description": "Type-safe multi-threading made 'easier'",
   "homepage": "https://github.com/duart38/Thread",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "releaseType": null,
   "unstable": false,
   "unlisted": false,
