@@ -4,19 +4,13 @@ on:
   pull_request_target:
     types: [ labeled, opened, unlabeled, reopened ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
+  issues: read
+  pull-requests: read
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: grevend/moscow-prioritization@v1.1.0
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
+      - uses: grevend/moscow-prioritization@v2.0.0
