@@ -96,8 +96,8 @@ onmessage = async function(e) {
     }
 
     if (file) {
-      this.debug("importing file: ", fqfn, "real path: ", Deno.realPathSync(fqfn));
-      const x = await import(Deno.realPathSync(fqfn)); //Deno.realPathSync(fqfn)
+      this.debug("importing file: ", fqfn, Deno.realPathSync(fqfn), import.meta.resolve(fqfn));
+      const x = await import("file://"+Deno.realPathSync(fqfn)); //Deno.realPathSync(fqfn)
       this.debug("file imported, inlining the following: ", Object.keys(x).join(","));
       return Object.keys(x).map((v) => x[v].toString());
     } else {
@@ -105,7 +105,7 @@ onmessage = async function(e) {
       this.debug("importing from the net: ", filePath);
       if (filePath.endsWith(".ts")) {
         this.debug("filePath ends with .ts, returning: ", str);
-        return [str]; // dont import the content if ts just paste import string
+        return [str]; // do nothing if plain import string
       }
       const x = await import(filePath);
       this.debug(
