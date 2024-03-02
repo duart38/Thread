@@ -7,7 +7,7 @@ const thread = new Thread<number, number[]>((e) => {
     return 0;
   } else {
     console.log("Worker: Posting message back to main script");
-    return (result);
+    return result;
   }
 });
 
