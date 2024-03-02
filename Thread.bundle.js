@@ -2,10 +2,6 @@
 // deno-lint-ignore-file
 // This code was bundled using `deno bundle` and it's not recommended to edit it manually
 
-const importMeta = {
-    url: "file:///Users/duartsnel/local/personal_projects/Thread/Thread.ts",
-    main: import.meta.main
-};
 class Thread {
     worker;
     imports;
@@ -18,7 +14,6 @@ class Thread {
     }){
         this.debugMode = opts.debug ?? false;
         this.imports = imports || [];
-        this.debug("import.meta: ", importMeta);
         this.blob = this.populateFile(operation);
         this.worker = this.makeWorker(type);
     }
@@ -62,8 +57,8 @@ onmessage = async function(e) {
             throw new Error("The import instruction seems to be unreadable try formatting it, for example: \n" + "import { something } from './somet.js' \n ");
         }
         if (file) {
-            this.debug("importing file: ", importMeta.resolve("file://" + Deno.realPathSync(fqfn)));
-            const x = await import("file://" + Deno.realPathSync(fqfn));
+            this.debug("importing file: ", "file://" + fqfn);
+            const x = await import("file://" + fqfn);
             this.debug("file imported, inlining the following: ", Object.keys(x).join(","));
             return Object.keys(x).map((v)=>x[v].toString());
         } else {

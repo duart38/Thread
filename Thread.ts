@@ -29,7 +29,6 @@ export default class Thread<T = unknown, K = unknown> {
   ) {
     this.debugMode = opts.debug ?? false;
     this.imports = imports || [];
-    this.debug("import.meta: ", import.meta);
 
     // these methods are asynchronous, because we're in the constructor, we must make sure they're at the end
     this.blob = this.populateFile(operation);
@@ -98,9 +97,9 @@ onmessage = async function(e) {
     if (file) {
       this.debug(
         "importing file: ",
-        import.meta.resolve("file://" + Deno.realPathSync(fqfn)),
+        "file://" + fqfn
       );
-      const x = await import("file://" + Deno.realPathSync(fqfn));
+      const x = await import("file://" + fqfn);
       this.debug(
         "file imported, inlining the following: ",
         Object.keys(x).join(","),
