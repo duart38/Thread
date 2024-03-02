@@ -96,9 +96,15 @@ onmessage = async function(e) {
     }
 
     if (file) {
-      this.debug("importing file: ", fqfn, Deno.realPathSync(fqfn), import.meta.resolve(fqfn));
-      const x = await import("file://"+Deno.realPathSync(fqfn)); //Deno.realPathSync(fqfn)
-      this.debug("file imported, inlining the following: ", Object.keys(x).join(","));
+      this.debug(
+        "importing file: ",
+        import.meta.resolve("file://" + Deno.realPathSync(fqfn)),
+      );
+      const x = await import("file://" + Deno.realPathSync(fqfn));
+      this.debug(
+        "file imported, inlining the following: ",
+        Object.keys(x).join(","),
+      );
       return Object.keys(x).map((v) => x[v].toString());
     } else {
       const filePath = matchedPath[0].replaceAll(/'|"/g, "");
