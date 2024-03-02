@@ -8,6 +8,8 @@ export default class Thread<T = unknown, K = unknown> {
   private imports: Array<string>;
   private blob: Promise<Blob>;
   private blobURL = "";
+  public debugMode: boolean;
+
   /**
    * Tells if the worker has been stopped
    */
@@ -23,8 +25,12 @@ export default class Thread<T = unknown, K = unknown> {
     ) => T | Promise<T>,
     type?: "classic" | "module",
     imports?: Array<string>,
+    opts: { debug?: boolean } = { debug: false },
   ) {
+    this.debugMode = opts.debug ?? false;
     this.imports = imports || [];
+
+    // these methods are asynchronous, because we're in the constructor, we must make sure they're at the end
     this.blob = this.populateFile(operation);
     this.worker = this.makeWorker(type);
   }
@@ -44,17 +50,18 @@ export default class Thread<T = unknown, K = unknown> {
     const imported = this.imports?.flatMap(async (val) =>
       (await this.copyDep(val)).join("\n")
     );
-    return new Blob([`
-    ${(await Promise.all(imported)).join("\n")}
-    
-    var global = {};
-    var userCode = ${code.toString()}
-    
-    onmessage = async function(e) {
-        postMessage(await userCode(e, global));
-    }
-    
-    `]);
+    const blobContent = `
+${(await Promise.all(imported)).join("\n")}
+
+var global = {};
+var userCode = ${code.toString()}
+
+onmessage = async function(e) {
+    postMessage(await userCode(e, global));
+}
+`;
+    this.debug(`Blob content:${blobContent}\n\n\n`);
+    return new Blob([blobContent]);
   }
 
   /**
@@ -65,6 +72,8 @@ export default class Thread<T = unknown, K = unknown> {
     const importPathRegex = /('|"|`)(.+(\.js|\.ts))(\1)/ig; // for the path string ("lorem/ipsum.js")
     const importInsRegex = /(import( |))({.+}|.+)(from( |))/ig; // for the instruction before the path (import {som} from)
     const matchedPath = importPathRegex.exec(str) || "";
+    this.debug("attempting to import: ", str);
+
     let file = false;
     let fqfn = "";
 
@@ -74,6 +83,7 @@ export default class Thread<T = unknown, K = unknown> {
     ) {
       file = true;
       fqfn = matchedPath[0].replaceAll(/('|"|`)/ig, "");
+      this.debug("file identified as local file");
     }
     const matchedIns = importInsRegex.exec(str) || ""; // matchedIns[0] > import {sss} from
 
@@ -85,16 +95,34 @@ export default class Thread<T = unknown, K = unknown> {
     }
 
     if (file) {
-      const x = await import(fqfn); //Deno.realPathSync(fqfn)
+      this.debug(
+        "importing file: ",
+        import.meta.resolve("file://" + Deno.realPathSync(fqfn)),
+      );
+      const x = await import("file://" + Deno.realPathSync(fqfn));
+      this.debug(
+        "file imported, inlining the following: ",
+        Object.keys(x).join(","),
+      );
       return Object.keys(x).map((v) => x[v].toString());
     } else {
       const filePath = matchedPath[0].replaceAll(/'|"/g, "");
+      this.debug("importing from the net: ", filePath);
       if (filePath.endsWith(".ts")) {
-        return [str]; // dont import the content if ts just paste import string
+        this.debug("filePath ends with .ts, returning: ", str);
+        return [str]; // do nothing if plain import string
       }
       const x = await import(filePath);
+      this.debug(
+        "imported from the net, inlining the following: ",
+        Object.keys(x).join(","),
+      );
       return Object.keys(x).map((v) => x[v].toString());
     }
+  }
+
+  private debug(...msg: unknown[]) {
+    if (this.debugMode) console.debug(`[${new Date()}]\t`, ...msg);
   }
 
   /**
