@@ -93,8 +93,8 @@ onmessage = async function(e) {
     }
 
     if (file) {
-      this.debug("importing file: ", fqfn);
-      const x = await import(fqfn); //Deno.realPathSync(fqfn)
+      this.debug("importing file: ", fqfn, "real path: ", Deno.realPathSync(fqfn));
+      const x = await import(Deno.realPathSync(fqfn)); //Deno.realPathSync(fqfn)
       this.debug("file imported, inlining the following: ", Object.keys(x).join(","));
       return Object.keys(x).map((v) => x[v].toString());
     } else {
