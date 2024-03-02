@@ -97,9 +97,9 @@ onmessage = async function(e) {
     if (file) {
       this.debug(
         "importing file: ",
-        "file://" + fqfn
+        import.meta.resolve("file://" + Deno.realPathSync(fqfn)),
       );
-      const x = await import("file://" + fqfn);
+      const x = await import("file://" + Deno.realPathSync(fqfn));
       this.debug(
         "file imported, inlining the following: ",
         Object.keys(x).join(","),
