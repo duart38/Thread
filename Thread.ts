@@ -27,10 +27,13 @@ export default class Thread<T = unknown, K = unknown> {
     imports?: Array<string>,
     opts: { debug?: boolean } = { debug: false },
   ) {
+    this.debugMode = opts.debug ?? false;
     this.imports = imports || [];
+    this.debug("import.meta: ", import.meta);
+
+    // these methods are asynchronous, because we're in the constructor, we must make sure they're at the end
     this.blob = this.populateFile(operation);
     this.worker = this.makeWorker(type);
-    this.debugMode = opts.debug ?? false;
   }
 
   private async makeWorker(type?: "classic" | "module") {
@@ -58,7 +61,7 @@ onmessage = async function(e) {
     postMessage(await userCode(e, global));
 }
 `;
-    this.debug(`\n\n\nBlob content:\n ${blobContent}\n\n\n`);
+    this.debug(`Blob content:${blobContent}\n\n\n`);
     return new Blob([blobContent]);
   }
 
@@ -114,7 +117,7 @@ onmessage = async function(e) {
   }
 
   private debug(...msg: unknown[]) {
-    if (this.debugMode) console.log(`[${new Date()}]\t`, ...msg);
+    if (this.debugMode) console.debug(`[${new Date()}]\t`, ...msg);
   }
 
   /**
